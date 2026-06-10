@@ -438,7 +438,7 @@
   <div id="detail-view">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
       <button class="back-btn" style="margin-bottom:0" onclick="showHome()">← 返回</button>
-      <button class="btn btn-ghost" onclick="openPoster()">🖼 生成日签</button>
+      <button class="btn btn-ghost" onclick="openPoster()">🖼 生成海报</button>
     </div>
     <div class="detail-date" id="detail-date-label"></div>
     <div class="words-grid" id="detail-words"></div>
@@ -522,7 +522,7 @@
 
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closePoster()">关闭</button>
-      <button class="btn btn-primary" onclick="downloadPoster()">⬇ 下载日签</button>
+      <button class="btn btn-primary" onclick="downloadPoster()">⬇ 下载海报</button>
     </div>
   </div>
 </div>
@@ -850,14 +850,19 @@
   const IMG_H = 580;         // image section height (px in actual canvas)
   let posterEntry = null;
   let posterBgImg = null;      // user-uploaded override
-  let defaultBgImg = null;     // loaded from bg.jpg
+  let defaultBgImg = null;     // loaded from bg.png
+  let logoImg = null;          // loaded from logo.png
   let posterTextTheme = 'light';
 
-  // Pre-load default background
+  // Pre-load default background and logo
   (function() {
-    const img = new Image();
-    img.onload = () => { defaultBgImg = img; };
-    img.src = 'bg.png';
+    const bg = new Image();
+    bg.onload = () => { defaultBgImg = bg; };
+    bg.src = 'bg.png';
+
+    const logo = new Image();
+    logo.onload = () => { logoImg = logo; };
+    logo.src = 'logo.png';
   })();
 
   function openPoster() {
@@ -968,6 +973,14 @@
       ctx.font = '300 30px "PingFang SC", "Microsoft YaHei", sans-serif';
       ctx.fillText(word.zh, 48, wy);
       wy += perWord - 46;
+    }
+
+    // ── Logo bottom-right ──
+    if (logoImg) {
+      const logoH = 80;
+      const logoW = Math.round(logoImg.width * (logoH / logoImg.height));
+      const margin = 36;
+      ctx.drawImage(logoImg, PW - logoW - margin, PH - logoH - margin, logoW, logoH);
     }
   }
 
