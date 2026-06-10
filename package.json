@@ -1,0 +1,13 @@
+{
+  "name": "daily-words",
+  "version": "1.0.0",
+  "description": "每日推荐单词 Web App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "npx nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
