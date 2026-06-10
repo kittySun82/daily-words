@@ -532,7 +532,381 @@
   let currentView = 'grid';
 
   // ── Default data ─────────────────────────────────────────
-  const DEFAULT_DATA = [{"date":"2026-06-16","words":[{"en":"Hand-brewed coffee","zh":"手磨咖啡"},{"en":"Mindfulness Coffee","zh":"正念咖啡"},{"en":"Solemn atmosphere","zh":"庄严的氛围"},{"en":"Grinding the beans","zh":"研磨咖啡豆"},{"en":"Savoring the coffee","zh":"品尝咖啡"}]},{"date":"2026-06-17","words":[{"en":"A session of meditation","zh":"一次禅修"},{"en":"An imported beverage","zh":"外来饮品"},{"en":"Swept across the world","zh":"风靡世界"},{"en":"World Meditation Day","zh":"世界冥想日"},{"en":"Congratulatory message","zh":"祝贺信息"}]},{"date":"2026-06-18","words":[{"en":"Flourish","zh":"繁荣"},{"en":"Living Chan","zh":"生活禅"},{"en":"Advocated","zh":"提倡，倡导"},{"en":"A moment of ease","zh":"悠闲时光"},{"en":"Stress and anxiety","zh":"压力和焦虑"}]},{"date":"2026-06-19","words":[{"en":"Manifestation","zh":"呈现"},{"en":"Fleeting","zh":"稍纵即逝"},{"en":"Leave a moment of blank space","zh":"留白一刻"},{"en":"The sense of ritual","zh":"仪式感"},{"en":"Anchor","zh":"锚点"}]},{"date":"2026-06-20","words":[{"en":"Concentration and awareness","zh":"专注力和觉察力"},{"en":"Solemn rituals","zh":"庄严的仪式"},{"en":"Unaccustomed","zh":"不习惯的"},{"en":"Moments of stillness","zh":"静谧时光"},{"en":"Scattered and deluded","zh":"散乱和执迷不悟"}]},{"date":"2026-06-21","words":[{"en":"Supportive conditions","zh":"助缘"},{"en":"Chaotic","zh":"混乱"},{"en":"Inner turmoil","zh":"内心的混乱"},{"en":"Chan meditation","zh":"禅修"},{"en":"Mindfulness meditation","zh":"正念禅修"}]},{"date":"2026-06-22","words":[{"en":"Greed, anger and ignorance","zh":"贪嗔痴"},{"en":"Thousand Hands, Thousand Eyes","zh":"千手千眼"},{"en":"Gaining momentum","zh":"势头很猛"},{"en":"Spiritual sustenance","zh":"精神归宿"},{"en":"Adrift","zh":"迷茫无助"}]},{"date":"2026-06-23","words":[{"en":"Wellspring of inner happiness","zh":"内心幸福的源泉"},{"en":"Journey of awakening","zh":"觉醒之路"},{"en":"Stay attentive","zh":"保持觉知"},{"en":"The rushing stream of thought","zh":"思维的瀑流"},{"en":"The barista","zh":"咖啡师"}]},{"date":"2026-06-24","words":[{"en":"Listen attentively","zh":"用心聆听"},{"en":"The aroma of the coffee","zh":"咖啡的香气"},{"en":"Warming the equipment","zh":"温器"},{"en":"Dhyana Coffee","zh":"正念咖啡"},{"en":"The sound of the chime","zh":"磬声"}]},{"date":"2026-06-25","words":[{"en":"Rich and fragrant","zh":"醇香"},{"en":"A mind of awareness","zh":"觉知的心"},{"en":"Inhale and exhale","zh":"吸入和呼出"},{"en":"Complement each other","zh":"相得益彰"},{"en":"Attachment","zh":"执着"}]},{"date":"2026-06-26","words":[{"en":"Drink Coffee with Mindfulness","zh":"带着正念喝咖啡"},{"en":"Rejoice","zh":"随喜"},{"en":"Resembles","zh":"异曲同工"},{"en":"Mindfulness prompts","zh":"正念引导词"},{"en":"Hand-brewing","zh":"手冲"}]},{"date":"2026-06-27","words":[{"en":"Glimpsing","zh":"瞥见"},{"en":"Audience-driven","zh":"由受众决定"},{"en":"Mentorship","zh":"传帮带"},{"en":"International sensation","zh":"国际爆款"},{"en":"Skillfully use the mind","zh":"善用其心"}]},{"date":"2026-06-28","words":[{"en":"Dhyana Tea Spaces","zh":"安心茶室"},{"en":"Mindful Peace Yards","zh":"静心小院"},{"en":"International Dharma outreach","zh":"国际弘法"},{"en":"The wisdom of Chan","zh":"禅的智慧"},{"en":"Dedication","zh":"用心"}]},{"date":"2026-06-29","words":[{"en":"Fade away","zh":"渐弱"},{"en":"Overlap","zh":"叠加"},{"en":"More layered experience","zh":"立体的呈现"},{"en":"Sip","zh":"一小口（喝咖啡）"},{"en":"Subtle","zh":"细腻"}]},{"date":"2026-06-30","words":[{"en":"Perception","zh":"感知"},{"en":"Concern for the past","zh":"担忧过去"},{"en":"Anticipation of the future","zh":"期待未来"},{"en":"Settling into stillness","zh":"止静"},{"en":"Vivid","zh":"深刻的"}]}];
+  const DEFAULT_DATA = [ {
+    "date": "2026-06-01",
+    "words": [
+      {
+        "en": "practicing mindfulness",
+        "zh": "修习正念"
+      },
+      {
+        "en": "peace of mind",
+        "zh": "安心"
+      },
+      {
+        "en": "awaken the mind",
+        "zh": "觉醒心灵"
+      },
+      {
+        "en": "right views",
+        "zh": "正见"
+      },
+      {
+        "en": "concentration meditation",
+        "zh": "止禅"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-02",
+    "words": [
+      {
+        "en": "full awareness",
+        "zh": "全然觉知"
+      },
+      {
+        "en": "settle the mind",
+        "zh": "调心"
+      },
+      {
+        "en": "harmonize the body",
+        "zh": "调身"
+      },
+      {
+        "en": "moving meditation",
+        "zh": "动中禅"
+      },
+      {
+        "en": "anchor the mind",
+        "zh": "安住心念"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-03",
+    "words": [
+      {
+        "en": "cultivate awareness",
+        "zh": "培养觉知"
+      },
+      {
+        "en": "delusive thoughts",
+        "zh": "妄念"
+      },
+      {
+        "en": "middle way",
+        "zh": "中道"
+      },
+      {
+        "en": "wholesome habits",
+        "zh": "善的习惯"
+      },
+      {
+        "en": "inner strength",
+        "zh": "内在力量"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-04",
+    "words": [
+      {
+        "en": "tai chi mindfulness ball",
+        "zh": "太极正念球"
+      },
+      {
+        "en": "turn the ball",
+        "zh": "转球"
+      },
+      {
+        "en": "follow the ball",
+        "zh": "跟随球"
+      },
+      {
+        "en": "guide the movement",
+        "zh": "引导动作"
+      },
+      {
+        "en": "keep the ball from dropping",
+        "zh": "不让球掉落"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-05",
+    "words": [
+      {
+        "en": "correct posture",
+        "zh": "正确姿势"
+      },
+      {
+        "en": "body movement",
+        "zh": "身体运动"
+      },
+      {
+        "en": "training habits",
+        "zh": "训练习惯"
+      },
+      {
+        "en": "basic techniques",
+        "zh": "基本技法"
+      },
+      {
+        "en": "continuous repetition",
+        "zh": "持续重复"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-06",
+    "words": [
+      {
+        "en": "progressive steps",
+        "zh": "进阶步骤"
+      },
+      {
+        "en": "master the skills",
+        "zh": "掌握技能"
+      },
+      {
+        "en": "automatic movement",
+        "zh": "自动运转"
+      },
+      {
+        "en": "adjust posture",
+        "zh": "调整姿势"
+      },
+      {
+        "en": "mind follows hands",
+        "zh": "心跟着手"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-07",
+    "words": [
+      {
+        "en": "physical health",
+        "zh": "身体健康"
+      },
+      {
+        "en": "mental well‑being",
+        "zh": "心理健康"
+      },
+      {
+        "en": "sub‑health state",
+        "zh": "亚健康状态"
+      },
+      {
+        "en": "qi and blood circulation",
+        "zh": "气血循环"
+      },
+      {
+        "en": "reduce tiredness",
+        "zh": "减轻疲劳"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-08",
+    "words": [
+      {
+        "en": "stay relaxed",
+        "zh": "保持放松"
+      },
+      {
+        "en": "body stiffness",
+        "zh": "身体僵硬"
+      },
+      {
+        "en": "feel energetic",
+        "zh": "精力充沛"
+      },
+      {
+        "en": "relieve pain",
+        "zh": "缓解疼痛"
+      },
+      {
+        "en": "sedentary lifestyle",
+        "zh": "久坐生活方式"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-09",
+    "words": [
+      {
+        "en": "smooth qi and blood",
+        "zh": "气血通畅"
+      },
+      {
+        "en": "healthy body and mind",
+        "zh": "身心健康"
+      },
+      {
+        "en": "body flexibility",
+        "zh": "身体柔软度"
+      },
+      {
+        "en": "calm the emotions",
+        "zh": "平静情绪"
+      },
+      {
+        "en": "reduce drowsiness",
+        "zh": "减少昏沉"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-10",
+    "words": [
+      {
+        "en": "anxiety and depression",
+        "zh": "焦虑与抑郁"
+      },
+      {
+        "en": "negative emotions",
+        "zh": "负面情绪"
+      },
+      {
+        "en": "lack of security",
+        "zh": "缺乏安全感"
+      },
+      {
+        "en": "stay alert",
+        "zh": "保持警觉"
+      },
+      {
+        "en": "clear the mind",
+        "zh": "让心清明"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-11",
+    "words": [
+      {
+        "en": "free from distraction",
+        "zh": "远离散乱"
+      },
+      {
+        "en": "inner peace",
+        "zh": "内心宁静"
+      },
+      {
+        "en": "emotional balance",
+        "zh": "情绪平衡"
+      },
+      {
+        "en": "mental clarity",
+        "zh": "心念清晰"
+      },
+      {
+        "en": "reduce stress",
+        "zh": "减轻压力"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-12",
+    "words": [
+      {
+        "en": "calm state",
+        "zh": "平静状态"
+      },
+      {
+        "en": "healthy mindset",
+        "zh": "健康心态"
+      },
+      {
+        "en": "emotional healing",
+        "zh": "情绪疗愈"
+      },
+      {
+        "en": "peaceful mind",
+        "zh": "平和的心"
+      },
+      {
+        "en": "overcome restlessness",
+        "zh": "克服浮躁"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-13",
+    "words": [
+      {
+        "en": "Eastern culture",
+        "zh": "东方文化"
+      },
+      {
+        "en": "international platform",
+        "zh": "国际平台"
+      },
+      {
+        "en": "spread Dharma",
+        "zh": "弘法"
+      },
+      {
+        "en": "training camp",
+        "zh": "养成营"
+      },
+      {
+        "en": "three‑level curriculum",
+        "zh": "三级课程"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-14",
+    "words": [
+      {
+        "en": "overseas students",
+        "zh": "海外学员"
+      },
+      {
+        "en": "live session",
+        "zh": "直播"
+      },
+      {
+        "en": "global popularity",
+        "zh": "全球受欢迎"
+      },
+      {
+        "en": "Chinese culture",
+        "zh": "中国文化"
+      },
+      {
+        "en": "project team",
+        "zh": "项目组"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-15",
+    "words": [
+      {
+        "en": "share globally",
+        "zh": "全球分享"
+      },
+      {
+        "en": "Eastern wisdom",
+        "zh": "东方智慧"
+      },
+      {
+        "en": "public demand",
+        "zh": "大众需求"
+      },
+      {
+        "en": "cultural exchange",
+        "zh": "文化交流"
+      },
+      {
+        "en": "promising future",
+        "zh": "光明前景"
+      }
+    ]
+  },{"date":"2026-06-16","words":[{"en":"Hand-brewed coffee","zh":"手磨咖啡"},{"en":"Mindfulness Coffee","zh":"正念咖啡"},{"en":"Solemn atmosphere","zh":"庄严的氛围"},{"en":"Grinding the beans","zh":"研磨咖啡豆"},{"en":"Savoring the coffee","zh":"品尝咖啡"}]},{"date":"2026-06-17","words":[{"en":"A session of meditation","zh":"一次禅修"},{"en":"An imported beverage","zh":"外来饮品"},{"en":"Swept across the world","zh":"风靡世界"},{"en":"World Meditation Day","zh":"世界冥想日"},{"en":"Congratulatory message","zh":"祝贺信息"}]},{"date":"2026-06-18","words":[{"en":"Flourish","zh":"繁荣"},{"en":"Living Chan","zh":"生活禅"},{"en":"Advocated","zh":"提倡，倡导"},{"en":"A moment of ease","zh":"悠闲时光"},{"en":"Stress and anxiety","zh":"压力和焦虑"}]},{"date":"2026-06-19","words":[{"en":"Manifestation","zh":"呈现"},{"en":"Fleeting","zh":"稍纵即逝"},{"en":"Leave a moment of blank space","zh":"留白一刻"},{"en":"The sense of ritual","zh":"仪式感"},{"en":"Anchor","zh":"锚点"}]},{"date":"2026-06-20","words":[{"en":"Concentration and awareness","zh":"专注力和觉察力"},{"en":"Solemn rituals","zh":"庄严的仪式"},{"en":"Unaccustomed","zh":"不习惯的"},{"en":"Moments of stillness","zh":"静谧时光"},{"en":"Scattered and deluded","zh":"散乱和执迷不悟"}]},{"date":"2026-06-21","words":[{"en":"Supportive conditions","zh":"助缘"},{"en":"Chaotic","zh":"混乱"},{"en":"Inner turmoil","zh":"内心的混乱"},{"en":"Chan meditation","zh":"禅修"},{"en":"Mindfulness meditation","zh":"正念禅修"}]},{"date":"2026-06-22","words":[{"en":"Greed, anger and ignorance","zh":"贪嗔痴"},{"en":"Thousand Hands, Thousand Eyes","zh":"千手千眼"},{"en":"Gaining momentum","zh":"势头很猛"},{"en":"Spiritual sustenance","zh":"精神归宿"},{"en":"Adrift","zh":"迷茫无助"}]},{"date":"2026-06-23","words":[{"en":"Wellspring of inner happiness","zh":"内心幸福的源泉"},{"en":"Journey of awakening","zh":"觉醒之路"},{"en":"Stay attentive","zh":"保持觉知"},{"en":"The rushing stream of thought","zh":"思维的瀑流"},{"en":"The barista","zh":"咖啡师"}]},{"date":"2026-06-24","words":[{"en":"Listen attentively","zh":"用心聆听"},{"en":"The aroma of the coffee","zh":"咖啡的香气"},{"en":"Warming the equipment","zh":"温器"},{"en":"Dhyana Coffee","zh":"正念咖啡"},{"en":"The sound of the chime","zh":"磬声"}]},{"date":"2026-06-25","words":[{"en":"Rich and fragrant","zh":"醇香"},{"en":"A mind of awareness","zh":"觉知的心"},{"en":"Inhale and exhale","zh":"吸入和呼出"},{"en":"Complement each other","zh":"相得益彰"},{"en":"Attachment","zh":"执着"}]},{"date":"2026-06-26","words":[{"en":"Drink Coffee with Mindfulness","zh":"带着正念喝咖啡"},{"en":"Rejoice","zh":"随喜"},{"en":"Resembles","zh":"异曲同工"},{"en":"Mindfulness prompts","zh":"正念引导词"},{"en":"Hand-brewing","zh":"手冲"}]},{"date":"2026-06-27","words":[{"en":"Glimpsing","zh":"瞥见"},{"en":"Audience-driven","zh":"由受众决定"},{"en":"Mentorship","zh":"传帮带"},{"en":"International sensation","zh":"国际爆款"},{"en":"Skillfully use the mind","zh":"善用其心"}]},{"date":"2026-06-28","words":[{"en":"Dhyana Tea Spaces","zh":"安心茶室"},{"en":"Mindful Peace Yards","zh":"静心小院"},{"en":"International Dharma outreach","zh":"国际弘法"},{"en":"The wisdom of Chan","zh":"禅的智慧"},{"en":"Dedication","zh":"用心"}]},{"date":"2026-06-29","words":[{"en":"Fade away","zh":"渐弱"},{"en":"Overlap","zh":"叠加"},{"en":"More layered experience","zh":"立体的呈现"},{"en":"Sip","zh":"一小口（喝咖啡）"},{"en":"Subtle","zh":"细腻"}]},{"date":"2026-06-30","words":[{"en":"Perception","zh":"感知"},{"en":"Concern for the past","zh":"担忧过去"},{"en":"Anticipation of the future","zh":"期待未来"},{"en":"Settling into stillness","zh":"止静"},{"en":"Vivid","zh":"深刻的"}]}];
 
   // ── Storage ──────────────────────────────────────────────
   function loadEntries() {
