@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日单词</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f0;
+      --surface: #ffffff;
+      --border: #e0e0d8;
+      --accent: #3b5bdb;
+      --accent-light: #eef2ff;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+
+    /* ── Buttons ── */
+    button {
+      cursor: pointer;
+      border: none;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #2f4cbf; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg); color: var(--text); }
+    .btn-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .btn-icon.active {
+      background: var(--accent-light);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .btn-icon:hover { background: var(--bg); }
+
+    /* ── Main container ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+
+    /* ── Page header bar ── */
+    .page-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-title { font-size: 22px; font-weight: 700; }
+    .view-toggle { display: flex; gap: 6px; }
+
+    /* ── Empty state ── */
+    .empty {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .empty p { font-size: 14px; }
+
+    /* ── Grid view ── */
+    .grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .date-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      overflow: hidden;
+    }
+    .date-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+    .card-top {
+      background: var(--accent);
+      color: #fff;
+      padding: 18px 16px 14px;
+    }
+    .card-month {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+    }
+    .card-day {
+      font-size: 40px;
+      font-weight: 800;
+      line-height: 1;
+      margin: 4px 0;
+    }
+    .card-year {
+      font-size: 12px;
+      opacity: 0.75;
+    }
+    .card-bottom {
+      padding: 12px 14px;
+    }
+    .card-preview {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .card-preview span {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-count {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    /* ── List view ── */
+    .list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .list-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+      box-shadow: var(--shadow);
+    }
+    .list-row:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .list-date-badge {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      min-width: 110px;
+      text-align: center;
+    }
+    .list-words {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .word-chip {
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .list-arrow { color: var(--muted); font-size: 18px; }
+
+    /* ── Detail view ── */
+    #detail-view { display: none; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-bottom: 24px;
+    }
+    .back-btn:hover { opacity: 0.75; }
+    .detail-date {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 24px;
+    }
+    .words-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .word-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+    }
+    .word-en {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .word-zh {
+      font-size: 16px;
+      color: var(--muted);
+    }
+    .word-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--border);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Import modal ── */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 560px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .file-drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: #fafafa;
+    }
+    .file-drop-zone:hover, .file-drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    .file-drop-zone input[type="file"] { display: none; }
+    .drop-icon { font-size: 36px; margin-bottom: 10px; }
+    .drop-label { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .drop-sub { font-size: 13px; color: var(--muted); }
+    .file-selected {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent-light);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .file-selected .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-clear {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 16px; padding: 0; line-height: 1;
+    }
+    .file-clear:hover { color: #dc2626; }
+    .modal-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 10px 0 18px;
+      line-height: 1.6;
+    }
+    .modal-hint code {
+      background: var(--bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .error-msg {
+      color: #dc2626;
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="logo">📖 每日单词</span>
+  <div class="header-actions">
+    <button class="btn btn-primary" onclick="openImport()">＋ 导入单词</button>
+  </div>
+</header>
+
+<main>
+  <!-- Home view -->
+  <div id="home-view">
+    <div class="page-bar">
+      <span class="page-title">所有日期</span>
+      <div class="view-toggle">
+        <button class="btn-icon active" id="btn-grid" title="Grid 视图" onclick="setView('grid')">⊞</button>
+        <button class="btn-icon" id="btn-list" title="List 视图" onclick="setView('list')">☰</button>
+      </div>
+    </div>
+    <div id="entries-container"></div>
+  </div>
+
+  <!-- Detail view -->
+  <div id="detail-view">
+    <button class="back-btn" onclick="showHome()">← 返回</button>
+    <div class="detail-date" id="detail-date-label"></div>
+    <div class="words-grid" id="detail-words"></div>
+  </div>
+</main>
+
+<!-- Import modal -->
+<div class="overlay" id="import-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <h2>导入单词</h2>
+    <p class="modal-sub">选择或拖入 JSON 文件</p>
+
+    <div class="file-drop-zone" id="drop-zone"
+         onclick="document.getElementById('file-input').click()"
+         ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)"
+         ondrop="handleDrop(event)">
+      <input type="file" id="file-input" accept=".json,application/json" onchange="handleFileSelect(event)" />
+      <div class="drop-icon">📂</div>
+      <div class="drop-label">点击选择文件</div>
+      <div class="drop-sub">或将 .json 文件拖到此处</div>
+    </div>
+
+    <div class="file-selected" id="file-selected" style="display:none">
+      <span>📄</span>
+      <span class="file-name" id="file-name-label"></span>
+      <button class="file-clear" onclick="clearFile(event)" title="移除">✕</button>
+    </div>
+
+    <div class="modal-hint">
+      支持单个对象 <code>{}</code> 或数组 <code>[]</code>。每条记录包含 <code>date</code>（YYYY-MM-DD）和 <code>words</code>（每个含 <code>en</code> 和 <code>zh</code>）。
+    </div>
+    <div class="error-msg" id="error-msg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeImport()">取消</button>
+      <button class="btn btn-primary" id="import-btn" onclick="importData()" disabled style="opacity:0.5;cursor:not-allowed">导入</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'daily_words_v1';
+  let currentView = 'grid';
+
+  // ── Storage ──────────────────────────────────────────────
+  function loadEntries() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+  function saveEntries(entries) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }
+
+  // ── View toggle ──────────────────────────────────────────
+  function setView(v) {
+    currentView = v;
+    document.getElementById('btn-grid').classList.toggle('active', v === 'grid');
+    document.getElementById('btn-list').classList.toggle('active', v === 'list');
+    renderEntries();
+  }
+
+  // ── Render ───────────────────────────────────────────────
+  function renderEntries() {
+    const entries = loadEntries();
+    const container = document.getElementById('entries-container');
+
+    if (entries.length === 0) {
+      container.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">📝</div>
+          <h2>还没有单词数据</h2>
+          <p>点击右上角「导入单词」开始添加</p>
+        </div>`;
+      return;
+    }
+
+    // Sort by date asc
+    entries.sort((a, b) => a.date.localeCompare(b.date));
+
+    if (currentView === 'grid') {
+      container.className = 'grid-view';
+      container.innerHTML = entries.map(e => {
+        const d = parseDate(e.date);
+        const preview = e.words.slice(0, 3).map(w =>
+          `<span>${w.en} · ${w.zh}</span>`).join('');
+        return `
+          <div class="date-card" onclick="showDetail('${e.date}')">
+            <div class="card-top">
+              <div class="card-month">${d.month}</div>
+              <div class="card-day">${d.day}</div>
+              <div class="card-year">${d.year}</div>
+            </div>
+            <div class="card-bottom">
+              <div class="card-preview">${preview}</div>
+              <div class="card-count">${e.words.length} 个单词</div>
+            </div>
+          </div>`;
+      }).join('');
+    } else {
+      container.className = 'list-view';
+      container.innerHTML = entries.map(e => {
+        const chips = e.words.map(w =>
+          `<span class="word-chip">${w.en}</span>`).join('');
+        return `
+          <div class="list-row" onclick="showDetail('${e.date}')">
+            <div class="list-date-badge">${e.date}</div>
+            <div class="list-words">${chips}</div>
+            <span class="list-arrow">›</span>
+          </div>`;
+      }).join('');
+    }
+  }
+
+  function parseDate(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'];
+    return { year, month: months[parseInt(month) - 1], day: parseInt(day) };
+  }
+
+  // ── Detail ───────────────────────────────────────────────
+  function showDetail(date) {
+    const entries = loadEntries();
+    const entry = entries.find(e => e.date === date);
+    if (!entry) return;
+
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('detail-view').style.display = 'block';
+    document.getElementById('detail-date-label').textContent = entry.date;
+
+    document.getElementById('detail-words').innerHTML = entry.words.map((w, i) => `
+      <div class="word-card">
+        <div class="word-num">WORD ${i + 1}</div>
+        <div class="word-en">${w.en}</div>
+        <div class="word-zh">${w.zh}</div>
+      </div>`).join('');
+  }
+
+  function showHome() {
+    document.getElementById('detail-view').style.display = 'none';
+    document.getElementById('home-view').style.display = 'block';
+  }
+
+  // ── Import modal ─────────────────────────────────────────
+  let pendingFileContent = null;
+
+  function openImport() {
+    document.getElementById('import-overlay').classList.add('open');
+    pendingFileContent = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-selected').style.display = 'none';
+    const btn = document.getElementById('import-btn');
+    btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed';
+    hideError();
+  }
+  function closeImport() {
+    document.getElementById('import-overlay').classList.remove('open');
+  }
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('import-overlay')) closeImport();
+  }
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideError() {
+    document.getElementById('error-msg').style.display = 'none';
+  }
+
+  function setFileReady(name, content) {
+    pendingFileContent = content;
+    document.getElementById('file-name-label').textContent = name;
+    document.getElementById('file-selected').style.display = 'flex';
+    const btn = document.getElementById('import-btn');
+    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+    hideError();
+  }
+
+  function clearFile(e) {
+    e.stopPropagation();
+    pendingFileContent = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-selected').style.display = 'none';
+    const btn = document.getElementById('import-btn');
+    btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed';
+    hideError();
+  }
+
+  function readFile(file) {
+    if (!file) return;
+    if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+      showError('请选择 .json 文件'); return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => setFileReady(file.name, e.target.result);
+    reader.onerror = () => showError('文件读取失败');
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  function handleFileSelect(e) {
+    readFile(e.target.files[0]);
+  }
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.add('drag-over');
+  }
+  function handleDragLeave() {
+    document.getElementById('drop-zone').classList.remove('drag-over');
+  }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.remove('drag-over');
+    readFile(e.dataTransfer.files[0]);
+  }
+
+  function importData() {
+    hideError();
+    if (!pendingFileContent) { showError('请先选择文件'); return; }
+
+    let parsed;
+    try { parsed = JSON.parse(pendingFileContent); }
+    catch (e) { showError('JSON 格式错误：' + e.message); return; }
+
+    const items = Array.isArray(parsed) ? parsed : [parsed];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!item.date || !/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
+        showError(`第 ${i+1} 条：date 格式应为 YYYY-MM-DD`); return;
+      }
+      if (!Array.isArray(item.words) || item.words.length === 0) {
+        showError(`第 ${i+1} 条：words 必须是非空数组`); return;
+      }
+      for (let j = 0; j < item.words.length; j++) {
+        const w = item.words[j];
+        if (!w.en || !w.zh) {
+          showError(`第 ${i+1} 条 words[${j}]：缺少 en 或 zh`); return;
+        }
+      }
+    }
+
+    const existing = loadEntries();
+    const map = {};
+    existing.forEach(e => map[e.date] = e);
+    items.forEach(e => map[e.date] = e);
+    saveEntries(Object.values(map));
+
+    closeImport();
+    renderEntries();
+  }
+
+  // ── Init ─────────────────────────────────────────────────
+  renderEntries();
+</script>
+</body>
+</html>
