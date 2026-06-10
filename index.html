@@ -438,7 +438,7 @@
   <div id="detail-view">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
       <button class="back-btn" style="margin-bottom:0" onclick="showHome()">← 返回</button>
-      <button class="btn btn-ghost" onclick="openPoster()">🖼 生成海报</button>
+      <button class="btn btn-ghost" onclick="openPoster()">🖼 生成日签</button>
     </div>
     <div class="detail-date" id="detail-date-label"></div>
     <div class="words-grid" id="detail-words"></div>
@@ -483,7 +483,7 @@
 <!-- Poster modal -->
 <div class="overlay" id="poster-overlay" onclick="handlePosterOverlayClick(event)">
   <div class="modal poster-modal">
-    <h2>生成海报</h2>
+    <h2>生成日签</h2>
     <p class="modal-sub">可自定义标题和背景图片</p>
 
     <div class="poster-layout">
@@ -522,7 +522,7 @@
 
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closePoster()">关闭</button>
-      <button class="btn btn-primary" onclick="downloadPoster()">⬇ 下载海报</button>
+      <button class="btn btn-primary" onclick="downloadPoster()">⬇ 下载日签</button>
     </div>
   </div>
 </div>
