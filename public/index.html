@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>每日单词</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -342,6 +343,73 @@
       margin-top: 8px;
       display: none;
     }
+
+    /* ── Poster modal ── */
+    .poster-modal { width: 500px; }
+    .poster-layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .poster-controls { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .poster-preview-wrap {
+      flex-shrink: 0;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #poster-canvas {
+      display: block;
+      border-radius: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      /* displayed at half actual size */
+      width: 188px;
+      height: auto;
+    }
+    .poster-upload-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .poster-upload-btn:hover { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+    .poster-bg-name {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .poster-clear-bg {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 13px; padding: 0; text-align: left;
+    }
+    .poster-clear-bg:hover { color: #dc2626; }
+    .poster-label-row { display: flex; flex-direction: column; gap: 4px; }
+    .poster-label-row label { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .poster-label-row input[type="text"] {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      color: var(--text);
+      background: var(--surface);
+    }
+    .poster-label-row input[type="text"]:focus { border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -368,7 +436,10 @@
 
   <!-- Detail view -->
   <div id="detail-view">
-    <button class="back-btn" onclick="showHome()">← 返回</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <button class="back-btn" style="margin-bottom:0" onclick="showHome()">← 返回</button>
+      <button class="btn btn-ghost" onclick="openPoster()">🖼 生成海报</button>
+    </div>
     <div class="detail-date" id="detail-date-label"></div>
     <div class="words-grid" id="detail-words"></div>
   </div>
@@ -378,17 +449,17 @@
 <div class="overlay" id="import-overlay" onclick="handleOverlayClick(event)">
   <div class="modal">
     <h2>导入单词</h2>
-    <p class="modal-sub">选择或拖入 JSON 文件</p>
+    <p class="modal-sub">选择或拖入 JSON / Word 文件</p>
 
     <div class="file-drop-zone" id="drop-zone"
          onclick="document.getElementById('file-input').click()"
          ondragover="handleDragOver(event)"
          ondragleave="handleDragLeave(event)"
          ondrop="handleDrop(event)">
-      <input type="file" id="file-input" accept=".json,application/json" onchange="handleFileSelect(event)" />
+      <input type="file" id="file-input" accept=".json,.docx,application/json,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="handleFileSelect(event)" />
       <div class="drop-icon">📂</div>
       <div class="drop-label">点击选择文件</div>
-      <div class="drop-sub">或将 .json 文件拖到此处</div>
+      <div class="drop-sub">支持 .json 和 .docx 格式</div>
     </div>
 
     <div class="file-selected" id="file-selected" style="display:none">
@@ -398,12 +469,60 @@
     </div>
 
     <div class="modal-hint">
-      支持单个对象 <code>{}</code> 或数组 <code>[]</code>。每条记录包含 <code>date</code>（YYYY-MM-DD）和 <code>words</code>（每个含 <code>en</code> 和 <code>zh</code>）。
+      <b>JSON：</b>单个对象 <code>{}</code> 或数组 <code>[]</code>，每条含 <code>date</code>（YYYY-MM-DD）和 <code>words</code>（每个含 <code>en</code>、<code>zh</code>）。<br/>
+      <b>Word：</b>每个日期作为标题，下方每行一个单词，英文和中文用空格、Tab 或横线分隔。日期无年份时自动补充当前年份。
     </div>
     <div class="error-msg" id="error-msg"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeImport()">取消</button>
       <button class="btn btn-primary" id="import-btn" onclick="importData()" disabled style="opacity:0.5;cursor:not-allowed">导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Poster modal -->
+<div class="overlay" id="poster-overlay" onclick="handlePosterOverlayClick(event)">
+  <div class="modal poster-modal">
+    <h2>生成海报</h2>
+    <p class="modal-sub">可自定义标题和背景图片</p>
+
+    <div class="poster-layout">
+      <!-- Controls -->
+      <div class="poster-controls">
+        <div class="poster-label-row">
+          <label>标题文字</label>
+          <input type="text" id="poster-title-input" value="Dharma English Club" oninput="renderPoster()" />
+        </div>
+
+        <div>
+          <input type="file" id="poster-bg-input" accept="image/*" style="display:none" onchange="handlePosterBgSelect(event)" />
+          <button class="poster-upload-btn" onclick="document.getElementById('poster-bg-input').click()">
+            <span>📷</span><span>选择背景图片</span>
+          </button>
+          <div id="poster-bg-info" style="margin-top:8px;display:none;display:flex;align-items:center;gap:6px">
+            <span class="poster-bg-name" id="poster-bg-name"></span>
+            <button class="poster-clear-bg" onclick="clearPosterBg()">✕ 移除</button>
+          </div>
+        </div>
+
+        <div class="poster-label-row">
+          <label>文字颜色</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost" style="padding:6px 10px;font-size:12px" onclick="setPosterTheme('light')">浅色文字</button>
+            <button class="btn btn-ghost" style="padding:6px 10px;font-size:12px" onclick="setPosterTheme('dark')">深色文字</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas preview -->
+      <div class="poster-preview-wrap">
+        <canvas id="poster-canvas"></canvas>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closePoster()">关闭</button>
+      <button class="btn btn-primary" onclick="downloadPoster()">⬇ 下载海报</button>
     </div>
   </div>
 </div>
@@ -420,6 +539,7 @@
   function saveEntries(entries) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   }
+
 
   // ── View toggle ──────────────────────────────────────────
   function setView(v) {
@@ -444,14 +564,13 @@
       return;
     }
 
-    // Sort by date asc
     entries.sort((a, b) => a.date.localeCompare(b.date));
 
     if (currentView === 'grid') {
       container.className = 'grid-view';
       container.innerHTML = entries.map(e => {
-        const d = parseDate(e.date);
-        const preview = e.words.slice(0, 3).map(w =>
+        const d = parseDateLabel(e.date);
+        const preview = e.words.slice(0, 1).map(w =>
           `<span>${w.en} · ${w.zh}</span>`).join('');
         return `
           <div class="date-card" onclick="showDetail('${e.date}')">
@@ -481,7 +600,7 @@
     }
   }
 
-  function parseDate(dateStr) {
+  function parseDateLabel(dateStr) {
     const [year, month, day] = dateStr.split('-');
     const months = ['Jan','Feb','Mar','Apr','May','Jun',
                     'Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -511,12 +630,104 @@
     document.getElementById('home-view').style.display = 'block';
   }
 
+  // ── Docx parsing ─────────────────────────────────────────
+
+  function normalizeDate(raw) {
+    const y = new Date().getFullYear();
+    raw = raw.trim();
+
+    // YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    // YYYY/MM/DD
+    if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(raw)) {
+      const [yr, m, d] = raw.split('/');
+      return `${yr}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+    }
+    // MM-DD or M-D (no year)
+    if (/^\d{1,2}-\d{1,2}$/.test(raw)) {
+      const [m, d] = raw.split('-');
+      return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+    }
+    // MM/DD
+    if (/^\d{1,2}\/\d{1,2}$/.test(raw)) {
+      const [m, d] = raw.split('/');
+      return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+    }
+    // Chinese: [YYYY年]M月D日
+    const cn = raw.match(/(?:(\d{4})年)?(\d{1,2})月(\d{1,2})日/);
+    if (cn) {
+      return `${cn[1]||y}-${cn[2].padStart(2,'0')}-${cn[3].padStart(2,'0')}`;
+    }
+    // English month: "January 15" or "January 15, 2024"
+    const enMonths = ['january','february','march','april','may','june',
+                      'july','august','september','october','november','december'];
+    const en = raw.toLowerCase().match(/^(\w+)\s+(\d{1,2})(?:[,\s]+(\d{4}))?$/);
+    if (en) {
+      const mi = enMonths.indexOf(en[1]);
+      if (mi >= 0) return `${en[3]||y}-${String(mi+1).padStart(2,'0')}-${en[2].padStart(2,'0')}`;
+    }
+    return null;
+  }
+
+  function isDateLine(line) {
+    return (
+      /^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/.test(line) ||
+      /^\d{1,2}[-\/]\d{1,2}$/.test(line) ||
+      /(?:\d{4}年)?\d{1,2}月\d{1,2}日/.test(line) ||
+      /^(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d/i.test(line)
+    );
+  }
+
+  function splitWordTranslation(line) {
+    // Tab
+    if (line.includes('\t')) {
+      const parts = line.split('\t').map(s => s.trim()).filter(Boolean);
+      if (parts.length >= 2) return { en: parts[0], zh: parts[1] };
+    }
+    // " - " or " – "
+    const dashMatch = line.match(/^([^-–]+?)\s*[-–]\s*(.+)$/);
+    if (dashMatch && /^[a-zA-Z]/.test(dashMatch[1].trim())) {
+      return { en: dashMatch[1].trim(), zh: dashMatch[2].trim() };
+    }
+    // ASCII→CJK boundary
+    const cjk = line.match(/^([a-zA-Z][a-zA-Z\s''-]*?)\s+([一-鿿㐀-䶿].*)$/);
+    if (cjk) return { en: cjk[1].trim(), zh: cjk[2].trim() };
+    // Two or more spaces
+    const spaces = line.match(/^(\S+)\s{2,}(.+)$/);
+    if (spaces) return { en: spaces[1].trim(), zh: spaces[2].trim() };
+    return null;
+  }
+
+  function parseDocxText(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const entries = [];
+    let currentDate = null;
+    let currentWords = [];
+
+    for (const line of lines) {
+      if (isDateLine(line)) {
+        if (currentDate && currentWords.length > 0) {
+          entries.push({ date: currentDate, words: currentWords });
+        }
+        currentDate = normalizeDate(line);
+        currentWords = [];
+      } else if (currentDate) {
+        const pair = splitWordTranslation(line);
+        if (pair) currentWords.push(pair);
+      }
+    }
+    if (currentDate && currentWords.length > 0) {
+      entries.push({ date: currentDate, words: currentWords });
+    }
+    return entries;
+  }
+
   // ── Import modal ─────────────────────────────────────────
-  let pendingFileContent = null;
+  let pendingItems = null;
 
   function openImport() {
     document.getElementById('import-overlay').classList.add('open');
-    pendingFileContent = null;
+    pendingItems = null;
     document.getElementById('file-input').value = '';
     document.getElementById('file-selected').style.display = 'none';
     const btn = document.getElementById('import-btn');
@@ -538,9 +749,9 @@
     document.getElementById('error-msg').style.display = 'none';
   }
 
-  function setFileReady(name, content) {
-    pendingFileContent = content;
-    document.getElementById('file-name-label').textContent = name;
+  function setFileReady(name, items) {
+    pendingItems = items;
+    document.getElementById('file-name-label').textContent = `${name}（解析到 ${items.length} 条记录）`;
     document.getElementById('file-selected').style.display = 'flex';
     const btn = document.getElementById('import-btn');
     btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
@@ -549,7 +760,7 @@
 
   function clearFile(e) {
     e.stopPropagation();
-    pendingFileContent = null;
+    pendingItems = null;
     document.getElementById('file-input').value = '';
     document.getElementById('file-selected').style.display = 'none';
     const btn = document.getElementById('import-btn');
@@ -559,18 +770,38 @@
 
   function readFile(file) {
     if (!file) return;
-    if (!file.name.endsWith('.json') && file.type !== 'application/json') {
-      showError('请选择 .json 文件'); return;
+    const isJson = file.name.endsWith('.json');
+    const isDocx = file.name.endsWith('.docx');
+    if (!isJson && !isDocx) { showError('请选择 .json 或 .docx 文件'); return; }
+
+    if (isJson) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        let parsed;
+        try { parsed = JSON.parse(ev.target.result); }
+        catch (e) { showError('JSON 格式错误：' + e.message); return; }
+        const items = Array.isArray(parsed) ? parsed : [parsed];
+        setFileReady(file.name, items);
+      };
+      reader.onerror = () => showError('文件读取失败');
+      reader.readAsText(file, 'UTF-8');
+    } else {
+      // docx via mammoth
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const result = await mammoth.extractRawValue({ arrayBuffer: ev.target.result });
+          const items = parseDocxText(result.value);
+          if (items.length === 0) { showError('未能从文档中解析到任何单词记录，请检查格式'); return; }
+          setFileReady(file.name, items);
+        } catch (e) { showError('Word 文件解析失败：' + e.message); }
+      };
+      reader.onerror = () => showError('文件读取失败');
+      reader.readAsArrayBuffer(file);
     }
-    const reader = new FileReader();
-    reader.onload = (e) => setFileReady(file.name, e.target.result);
-    reader.onerror = () => showError('文件读取失败');
-    reader.readAsText(file, 'UTF-8');
   }
 
-  function handleFileSelect(e) {
-    readFile(e.target.files[0]);
-  }
+  function handleFileSelect(e) { readFile(e.target.files[0]); }
   function handleDragOver(e) {
     e.preventDefault();
     document.getElementById('drop-zone').classList.add('drag-over');
@@ -584,40 +815,182 @@
     readFile(e.dataTransfer.files[0]);
   }
 
-  function importData() {
-    hideError();
-    if (!pendingFileContent) { showError('请先选择文件'); return; }
-
-    let parsed;
-    try { parsed = JSON.parse(pendingFileContent); }
-    catch (e) { showError('JSON 格式错误：' + e.message); return; }
-
-    const items = Array.isArray(parsed) ? parsed : [parsed];
-
+  function validateItems(items) {
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (!item.date || !/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
-        showError(`第 ${i+1} 条：date 格式应为 YYYY-MM-DD`); return;
+        return `第 ${i+1} 条：date 格式应为 YYYY-MM-DD（当前值：${item.date}）`;
       }
       if (!Array.isArray(item.words) || item.words.length === 0) {
-        showError(`第 ${i+1} 条：words 必须是非空数组`); return;
+        return `第 ${i+1} 条：words 为空`;
       }
       for (let j = 0; j < item.words.length; j++) {
         const w = item.words[j];
-        if (!w.en || !w.zh) {
-          showError(`第 ${i+1} 条 words[${j}]：缺少 en 或 zh`); return;
-        }
+        if (!w.en || !w.zh) return `第 ${i+1} 条 words[${j}]：缺少 en 或 zh`;
       }
     }
+    return null;
+  }
 
-    const existing = loadEntries();
-    const map = {};
-    existing.forEach(e => map[e.date] = e);
-    items.forEach(e => map[e.date] = e);
-    saveEntries(Object.values(map));
+  function importData() {
+    hideError();
+    if (!pendingItems) { showError('请先选择文件'); return; }
+
+    const err = validateItems(pendingItems);
+    if (err) { showError(err); return; }
+
+    saveEntries(pendingItems); // overwrite all
 
     closeImport();
     renderEntries();
+  }
+
+  // ── Poster ───────────────────────────────────────────────
+  const PW = 750, PH = 1360; // 2× retina (displayed at half)
+  const IMG_H = 580;         // image section height (px in actual canvas)
+  let posterEntry = null;
+  let posterBgImg = null;      // user-uploaded override
+  let defaultBgImg = null;     // loaded from bg.png
+  let logoImg = null;          // loaded from logo.png
+  let posterTextTheme = 'light';
+
+  // Pre-load default background and logo
+  (function() {
+    const bg = new Image();
+    bg.onload = () => { defaultBgImg = bg; };
+    bg.src = 'bg.png';
+
+    const logo = new Image();
+    logo.onload = () => { logoImg = logo; };
+    logo.src = 'logo.png';
+  })();
+
+  function openPoster() {
+    const dateLabel = document.getElementById('detail-date-label').textContent;
+    posterEntry = loadEntries().find(e => e.date === dateLabel);
+    if (!posterEntry) return;
+    document.getElementById('poster-overlay').classList.add('open');
+    renderPoster();
+  }
+  function closePoster() {
+    document.getElementById('poster-overlay').classList.remove('open');
+  }
+  function handlePosterOverlayClick(e) {
+    if (e.target === document.getElementById('poster-overlay')) closePoster();
+  }
+  function setPosterTheme(t) {
+    posterTextTheme = t;
+    renderPoster();
+  }
+  function handlePosterBgSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        posterBgImg = img;
+        document.getElementById('poster-bg-name').textContent = file.name;
+        document.getElementById('poster-bg-info').style.display = 'flex';
+        renderPoster();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  function clearPosterBg() {
+    posterBgImg = null;
+    document.getElementById('poster-bg-input').value = '';
+    document.getElementById('poster-bg-info').style.display = 'none';
+    renderPoster();
+  }
+
+  function renderPoster() {
+    if (!posterEntry) return;
+    const canvas = document.getElementById('poster-canvas');
+    canvas.width = PW;
+    canvas.height = PH;
+    const ctx = canvas.getContext('2d');
+
+    // ── Image section ──
+    const activeBg = posterBgImg || defaultBgImg;
+    if (activeBg) {
+      const scale = Math.max(PW / activeBg.width, IMG_H / activeBg.height);
+      const sw = PW / scale, sh = IMG_H / scale;
+      const sx = (activeBg.width - sw) / 2, sy = (activeBg.height - sh) / 2;
+      ctx.drawImage(activeBg, sx, sy, sw, sh, 0, 0, PW, IMG_H);
+    } else {
+      const gr = ctx.createLinearGradient(0, 0, 0, IMG_H);
+      gr.addColorStop(0, '#6a8fae');
+      gr.addColorStop(1, '#2d4a6e');
+      ctx.fillStyle = gr;
+      ctx.fillRect(0, 0, PW, IMG_H);
+    }
+
+    // Gradient overlay at bottom of image
+    const fadeGr = ctx.createLinearGradient(0, IMG_H - 200, 0, IMG_H);
+    fadeGr.addColorStop(0, 'rgba(0,0,0,0)');
+    fadeGr.addColorStop(1, 'rgba(0,0,0,0.52)');
+    ctx.fillStyle = fadeGr;
+    ctx.fillRect(0, IMG_H - 200, PW, 200);
+
+    // Top-left: org/title text
+    const titleText = document.getElementById('poster-title-input').value || '每日单词';
+    const imgTextColor = posterTextTheme === 'dark' ? 'rgba(20,20,20,0.85)' : 'rgba(255,255,255,0.88)';
+    ctx.fillStyle = imgTextColor;
+    ctx.font = '500 26px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText(titleText, 40, 52);
+
+    // Date at bottom of image
+    const dateObj = new Date(posterEntry.date + 'T12:00:00');
+    const days = ['周日/Sun','周一/Mon','周二/Tue','周三/Wed','周四/Thu','周五/Fri','周六/Sat'];
+    const dayStr = `${dateObj.getFullYear()} ${days[dateObj.getDay()]}。`;
+    const mmdd = `${String(dateObj.getMonth()+1).padStart(2,'0')}/${String(dateObj.getDate()).padStart(2,'0')}`;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.78)';
+    ctx.font = '300 26px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText(dayStr, 40, IMG_H - 86);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 90px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText(mmdd, 40, IMG_H - 10);
+
+    // ── Cream section ──
+    ctx.fillStyle = '#f0ebe0';
+    ctx.fillRect(0, IMG_H, PW, PH - IMG_H);
+
+    // Words
+    const wordAreaH = PH - IMG_H;
+    const perWord = Math.floor(wordAreaH / (posterEntry.words.length + 0.5));
+    let wy = IMG_H + Math.floor(perWord * 0.45);
+
+    for (const word of posterEntry.words) {
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = 'bold 38px "PingFang SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText(word.en, 48, wy);
+      wy += 46;
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '300 30px "PingFang SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText(word.zh, 48, wy);
+      wy += perWord - 46;
+    }
+
+    // ── Logo bottom-right ──
+    if (logoImg) {
+      const logoH = 80;
+      const logoW = Math.round(logoImg.width * (logoH / logoImg.height));
+      const margin = 36;
+      ctx.drawImage(logoImg, PW - logoW - margin, PH - logoH - margin, logoW, logoH);
+    }
+  }
+
+  function downloadPoster() {
+    if (!posterEntry) return;
+    const canvas = document.getElementById('poster-canvas');
+    const link = document.createElement('a');
+    link.download = `poster-${posterEntry.date}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   }
 
   // ── Init ─────────────────────────────────────────────────
